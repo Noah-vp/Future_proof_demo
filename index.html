@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Future Proof Label Demo</title>
+    <link rel="icon" type="image/x-icon" href="icon.ico">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f4f8;
+        }
+        .container {
+            width: 80%;
+            max-width: 500px;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+        .button {
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #2b8a3e;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 100%;
+        }
+        .button:hover {
+            background-color: #1d6b29; /* Darker shade for hover */
+            transform: scale(1.05); /* Slightly enlarge the button */
+        }
+        input[type="checkbox"] {
+            cursor: pointer; /* Thumb cursor on checkbox */
+        }
+        .button:disabled {
+            background-color: #c6ecce;
+        }
+        .budget-info {
+            background-color: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            color: #1565c0;
+        }
+        .budget-info span {
+            font-weight: bold;
+        }
+        .upgrade {
+            margin: 10px 0;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .upgrade input[type="checkbox"] {
+            transform: scale(1.5);
+            margin-right: 10px;
+        }
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #2b8a3e;
+        }
+    </style>
+</head>
+<body>
+
+<div id="startPage" class="container">
+    <h2>Welcome to Future Proof Label</h2>
+    <p>Press the button below to generate your house stats!</p>
+    <button class="button" onclick="generateStats()">Generate House Stats</button>
+</div>
+
+<div id="statsPage" class="container" style="display: none;">
+    <h2>Your House Stats</h2>
+    <div class="budget-info">
+        <p>House Value: $<span id="houseValue"></span></p>
+        <p>Upgrade Budget: $<span id="upgradeBudget"></span></p>
+        <p>Future proof score: <span id="fpScore"></span></p>
+    </div>
+    <button class="button" onclick="goToUpgradePage()">Go to Upgrade Page</button>
+</div>
+
+<div id="upgradePage" class="container" style="display: none;">
+    <h2>Future Proof Your Home</h2>
+    <div class="budget-info">
+        <p>House Value: $<span id="displayHouseValue"></span></p>
+        <p>Remaining Budget: $<span id="remainingBudget"></span></p>
+    </div>
+
+    <div class="upgrades">
+        <h3>Select Upgrades:</h3>
+        <div class="upgrade">
+            <input type="checkbox" id="solarPanels" data-cost="8361.95" data-score="3" onchange="updateBudget()">
+            <label for="solarPanels">Solar Panels ($8,361.95)</label>
+        </div>
+        <div class="upgrade">
+            <input type="checkbox" id="fireplaceInstallation" data-cost="1255.50" data-score="-1" onchange="updateBudget()">
+            <label for="fireplaceInstallation">Fireplace Installation ($1,255.50)</label>
+        </div>
+        <div class="upgrade">
+            <input type="checkbox" id="fireAlarm" data-cost="30.25" data-score="1" onchange="updateBudget()">
+            <label for="fireAlarm">Fire Alarm ($30.25)</label>
+        </div>
+        <div class="upgrade">
+            <input type="checkbox" id="antiTheftSystem" data-cost="495.50" data-score="1" onchange="updateBudget()">
+            <label for="antiTheftSystem">Anti-Theft System ($495.50)</label>
+        </div>
+        <div class="upgrade">
+            <input type="checkbox" id="toiletSwap" data-cost="320.95" data-score="1" onchange="updateBudget()">
+            <label for="toiletSwap">Toilet Swap ($320.95)</label>
+        </div>
+        <div class="upgrade">
+            <input type="checkbox" id="waterRecirculation" data-cost="4100" data-score="3" onchange="updateBudget()">
+            <label for="waterRecirculation">Water Recirculation System ($4,100)</label>
+        </div>
+        <div class="upgrade">
+            <input type="checkbox" id="rainWaterCollection" data-cost="3550" data-score="2" onchange="updateBudget()">
+            <label for="rainWaterCollection">Rainwater Collection ($3,550)</label>
+        </div>
+    </div>
+    
+
+    <button class="button" id="calcScore" onclick="goToScorePage()">Calculate Score</button>
+</div>
+
+<div id="scorePage" class="container" style="display: none;">
+    <h2>Upgrade Summary</h2>
+    <div class="result" id="result"></div>
+    <img id="label" alt="FP_label">
+    <button class="button" onclick="resetProcess()">Start Over</button>
+</div>
+
+<script>
+    let houseValue, upgradeBudget, remainingBudget, fpScore;
+
+    function convert_to_grade (percentage){
+        if (percentage >= 97) return "A+";
+        if (percentage >= 93) return "A";
+        if (percentage >= 90) return "A-";
+        if (percentage >= 87) return "B+";
+        if (percentage >= 83) return "B";
+        if (percentage >= 80) return "B-";
+        if (percentage >= 77) return "C+";
+        if (percentage >= 73) return "C";
+        if (percentage >= 70) return "C-";
+        if (percentage >= 67) return "D+";
+        if (percentage >= 63) return "D";
+        if (percentage >= 60) return "D-";
+        if (percentage >= 57) return "E+";
+        if (percentage >= 53) return "E";
+        if (percentage >= 50) return "E-";
+        if (percentage >= 47) return "F+";
+        if (percentage >= 43) return "F";
+        if (percentage >= 40) return "F-";
+        if (percentage >= 37) return "G+";
+        if (percentage >= 33) return "G";
+        return "G-";
+    }
+    
+    function generateStats() {
+        houseValue = 350000; // between $200,000 and $300,000
+        upgradeBudget = Math.floor(Math.random() * 10000) + 5000; // between $5,000 and $15,000
+        fpScore = Math.floor(Math.random() * 30) + 30 
+        remainingBudget = upgradeBudget;
+
+        document.getElementById("houseValue").textContent = houseValue.toLocaleString();
+        document.getElementById("upgradeBudget").textContent = upgradeBudget.toLocaleString();
+        document.getElementById("fpScore").textContent = convert_to_grade(fpScore).toLocaleString();
+
+        document.getElementById("startPage").style.display = "none";
+        document.getElementById("statsPage").style.display = "block";
+    }
+
+    function goToUpgradePage() {
+        document.getElementById("displayHouseValue").textContent = houseValue.toLocaleString();
+        document.getElementById("remainingBudget").textContent = remainingBudget.toLocaleString();
+
+        document.getElementById("statsPage").style.display = "none";
+        document.getElementById("upgradePage").style.display = "block";
+    }
+
+    function updateBudget() {
+        remainingBudget = upgradeBudget;
+
+        document.querySelectorAll('.upgrade input[type="checkbox"]').forEach((checkbox) => {
+            if (checkbox.checked) {
+                let cost = parseInt(checkbox.getAttribute("data-cost"));
+                remainingBudget -= cost;
+            }
+        });
+        document.getElementById("remainingBudget").textContent = remainingBudget.toLocaleString()
+        document.getElementById("remainingBudget").style.color = remainingBudget >= 0 ? "#1565c0" : "red";
+        document.getElementById("calcScore").disabled = remainingBudget >= 0 ? false: true;
+    }
+
+    function goToScorePage() {
+        let totalCost = 0;
+        let totalScore = 0;
+        
+        document.querySelectorAll('.upgrade input[type="checkbox"]').forEach((checkbox) => {
+            if (checkbox.checked) {
+                let cost = parseInt(checkbox.getAttribute("data-cost"));
+                let score = parseInt(checkbox.getAttribute("data-score"));
+
+                if (totalCost + cost <= upgradeBudget) {
+                    totalCost += cost;
+                    totalScore += score;
+                }
+            }
+        });
+
+        var percentageIcrease = totalScore * 5 
+        let newFP = fpScore + percentageIcrease
+
+        let potentialValueIncrease = houseValue * (1+(percentageIcrease/200));
+
+        document.getElementById("result").innerHTML = `
+            Total Upgrade Cost: $${totalCost.toLocaleString()}<br>
+            Future proof percentage increase: ${percentageIcrease}%<br>
+            Upgraded from ${convert_to_grade(fpScore)} to ${convert_to_grade(newFP)}.<br>
+            Estimated House Value Increased from $${houseValue.toLocaleString()} to $${potentialValueIncrease.toLocaleString()}
+        `;
+        document.getElementById("label").src = `logo FPL/FPL ${convert_to_grade(newFP)}.png`;
+        document.getElementById("upgradePage").style.display = "none";
+        document.getElementById("scorePage").style.display = "block";
+    }
+
+    function resetProcess() {
+        document.getElementById("startPage").style.display = "block";
+        document.getElementById("statsPage").style.display = "none";
+        document.getElementById("upgradePage").style.display = "none";
+        document.getElementById("scorePage").style.display = "none";
+
+        document.querySelectorAll('.upgrade input[type="checkbox"]').forEach((checkbox) => {
+            checkbox.checked = false;
+        });
+    }
+</script>
+
+</body>
+</html>
